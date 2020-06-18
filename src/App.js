@@ -8,6 +8,7 @@ import {
 	bindActionCreators,
 	applyMiddleware,
 } from "redux";
+import { act } from "react-dom/test-utils";
 
 function App() {
 	const makeLouder = (string) => string.toUpperCase();
@@ -57,7 +58,26 @@ function App() {
 
   const handrolledDispatched = store.dispatch(createAddAction(4));
 
-  const dispatchAdd = bindActionCreators(createAddAction, store.dispatch)
+  const dispatchAdd = bindActionCreator(createAddAction, store.dispatch)
+
+
+  const bindActionCreators = (action, dispatch) => {
+    return Object.keys(action).reduce((boundActions,key) => {
+      boundActions[key] = bindActionCreator(actions[key],dispatch)
+    },{})
+  }
+
+  const logger = ({getState}) => {
+    return next => action => {
+      console.log('middleWare', getState(), action);
+      const value  = next(action);
+      return value;
+    };
+
+  }
+
+  const secondStore = createStore(reducer, applyMiddleware(logger));
+
 	return <>hi</>;
 }
 
